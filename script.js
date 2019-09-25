@@ -1,13 +1,25 @@
 const score = document.querySelector('.score'),
   start = document.querySelector('.start'),
   gameArea = document.querySelector('.gameArea'),
-  car = document.createElement('div');
+  game = document.querySelector('.game'),
+  car = document.createElement('div'),
+  music = document.createElement('audio'),
+  stop = document.createElement('button');
 
+
+let myStorage = localStorage;
+myStorage.setItem('record', 0);
+
+
+music.classList.add('music');
+music.volume = 0.2;
 car.classList.add('car');
 
 start.addEventListener('click', startGame);
 document.addEventListener('keydown', startRun);
 document.addEventListener('keyup', stopRun);
+stop.addEventListener('click', stopGame);
+
 
 const keys = {
   ArrowUp: false,
@@ -24,11 +36,28 @@ const setting = {
 };
 
 function getQuantityElements(heightElement) {
-  return document.documentElement.clientHeight / heightElement + 1;
+  return (gameArea.offsetHeight / heightElement) + 1;
 }
 
-function startGame() {
+function startGame(event) {
+
+  let target = event.target;
+  if (target.classList.contains('light')) {
+    setting.speed = 2;
+    setting.traffic = 4;
+  } else if (target.classList.contains('medium')) {
+    setting.speed = 3;
+    setting.traffic = 3;
+  } else if (target.classList.contains('hard')) {
+    setting.speed = 4;
+    setting.traffic = 2;
+  } else return;
+
   start.classList.add('hide');
+  gameArea.innerHTML = '';
+  car.style.left = '125px';
+  car.style.top = 'auto';
+  car.style.bottom = '10px';
 
   for (let i = 0; i < getQuantityElements(100); i++) {
     const line = document.createElement('div');
@@ -40,16 +69,27 @@ function startGame() {
 
   for (let i = 0; i < getQuantityElements(100 * setting.traffic); i++) {
     const enemy = document.createElement('div');
+    let enemyImg = Math.floor(Math.random() * 3) + 1;
     enemy.classList.add('enemy');
     enemy.y = -100 * setting.traffic * (i + 1);
     enemy.style.left = Math.floor(Math.random() * (gameArea.offsetWidth - 50)) + 'px';
     enemy.style.top = enemy.y + 'px';
-    enemy.style.background = 'transparent url("./image/enemy3.png") center / cover no-repeat';
+    enemy.style.background = `transparent url("./image/enemy${enemyImg}.png") center / cover no-repeat`;
     gameArea.appendChild(enemy);
   }
-
+  setting.score = 0;
   setting.start = true;
+
   gameArea.appendChild(car);
+  music.setAttribute('controls', true);
+  music.setAttribute('autoplay', true);
+  music.setAttribute('src', './audio/Alan Walker - Faded.mp3');
+
+  game.appendChild(stop);
+  stop.classList.add('stopCurrRun');
+  stop.textContent = 'STOP GAME';
+
+  game.appendChild(music);
   setting.x = car.offsetLeft;
   setting.y = car.offsetTop;
   requestAnimationFrame(playGame);
@@ -57,6 +97,8 @@ function startGame() {
 
 function playGame() {
   if (setting.start) {
+    setting.score += setting.speed;
+    score.innerHTML = 'SCORE<br>' + setting.score;
     moveRoad();
     moveEnemy();
     if (keys.ArrowLeft && setting.x > 0) {
@@ -74,17 +116,35 @@ function playGame() {
     car.style.left = setting.x + 'px';
     car.style.top = setting.y + 'px';
     requestAnimationFrame(playGame);
+  } else {
+    music.remove();
+    stop.remove();
+    if (myStorage['record'] <= setting.score) {
+      myStorage['record'] = setting.score;
+      alert('Ура! Вы побили свой рекорд');
+      return myStorage['record'];
+    }
   }
+}
+
+function stopGame() {
+  setting.start = false;
+  start.classList.remove('hide');
+  start.style.top = score.offsetHeight;
 }
 
 function startRun(event) {
   event.preventDefault();
-  keys[event.key] = true;
+  if (keys.hasOwnProperty(event.key)) {
+    keys[event.key] = true;
+  }
 }
 
 function stopRun(event) {
   event.preventDefault();
-  keys[event.key] = false;
+  if (keys.hasOwnProperty(event.key)) {
+    keys[event.key] = false;
+  }
 }
 
 function moveRoad() {
@@ -93,7 +153,7 @@ function moveRoad() {
     line.y += setting.speed;
     line.style.top = line.y + 'px';
 
-    if (line.y >= document.documentElement.clientHeight) {
+    if (line.y >= gameArea.offsetHeight) {
       line.y = -100;
     }
   })
@@ -101,13 +161,24 @@ function moveRoad() {
 
 function moveEnemy() {
   let enemy = document.querySelectorAll('.enemy');
-  enemy.forEach(function(item) {
+  enemy.forEach(function (item) {
+    let carRect = car.getBoundingClientRect();
+    let enemyRect = item.getBoundingClientRect();
+
+    if (carRect.top <= enemyRect.bottom && carRect.right >= enemyRect.left &&
+      carRect.left <= enemyRect.right && carRect.bottom >= enemyRect.top) {
+      setting.start = false;
+      console.warn('dtp');
+      start.classList.remove('hide');
+      start.style.top = score.offsetHeight;
+    }
+
     item.y += setting.speed / 2;
     item.style.top = item.y + 'px';
 
-    if(item.y >= document.documentElement.clientHeight) {
+    if (item.y >= gameArea.offsetHeight) {
       item.y = -100 * setting.traffic;
-      item.style.left = Math.floor(Math.random() * (gameArea.offsetWidth -50)) + 'px';
+      item.style.left = Math.floor(Math.random() * (gameArea.offsetWidth - 50)) + 'px';
     }
   })
 }

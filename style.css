@@ -57,13 +57,11 @@ table {
   height: 100px;
   background: transparent url("./image/player.png") center / cover no-repeat;
   position: absolute;
-  left: 125px;
-  bottom: 10px;
 }
 
 .gameArea {
   width: 300px;
-  height: 100vh;
+  height: 650px;
   position: relative;
   margin: auto;
   background: #222;
@@ -76,5 +74,75 @@ table {
   height: 50px;
   background: #fff;
   left: 145px;
+}
 
+.game {
+  position: relative;
+}
+
+.music {
+  margin-top: 20px;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.start {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  margin: 0;
+  padding: 2rem 0;
+  text-align: center;
+  z-index: 99;
+  background: #000000;
+}
+button {
+  margin-right: 20px;
+  background: #8ffff0;
+  width: 120px;
+  height: 30px;
+  border: none;
+  border-radius: 5px;
+  color: #000;
+  font-size: 1.5rem;
+  cursor: pointer;
+  font-family: sans-serif;
+  font-weight: 700;
+}
+.light {
+  background: green;
+}
+.medium {
+  background: orange;
+}
+.hard {
+  background: red;
+}
+.stopCurrRun {
+  width: 170px;
+  color: #000;
+  background: blue;
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 99;
+  margin: 2rem;
+}
+
+
+.score {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background: #000000;
+  padding: 1rem 0;
+  z-index: 99;
+  font-size: 2rem;
+  color: #ff1d0e;
+  text-align: center;
+  font-family: sans-serif;
+  font-weight: 500;
 }
